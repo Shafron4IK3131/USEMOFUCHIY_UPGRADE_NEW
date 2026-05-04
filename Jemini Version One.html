@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USEMOGUCHIY UPGRADE | Система продаж</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Space Grotesk"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            900: '#312e81',
+                            950: '#1e1b4b',
+                        },
+                        dark: '#050507',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #050507;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* Утилиты для премиум-дизайна */
+        .glass {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .glass-panel {
+            background: linear-gradient(145deg, rgba(30, 27, 75, 0.4) 0%, rgba(5, 5, 7, 0.8) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .text-gradient {
+            background: linear-gradient(to right, #ffffff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glow-box {
+            box-shadow: 0 0 40px rgba(99, 102, 241, 0.15);
+        }
+
+        .glow-text {
+            text-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+        }
+
+        /* Анимации появления (Reveal) */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Мокап: без внутреннего скролла, масштаб через JS */
+        .mockup-viewport {
+            flex: 1;
+            min-height: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .mockup-scale-wrap {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            transform-origin: top center;
+            will-change: transform;
+        }
+
+        /* Индикатор скролла */
+        #scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(to right, #6366f1, #a5b4fc);
+            width: 0%;
+            z-index: 1000;
+            transition: width 0.1s;
+        }
+
+        /* Плавающие элементы фона */
+        .blob {
+            position: absolute;
+            filter: blur(100px);
+            z-index: -1;
+            opacity: 0.4;
+            animation: float 10s infinite alternate;
+        }
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, -50px) scale(1.1); }
+        }
+
+        /* Стили узлов (Nodes) */
+        .node-item {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            z-index: 10;
+        }
+        .node-item:hover, .node-item.active-node {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.4);
+            border-color: rgba(99, 102, 241, 0.8);
+            background: rgba(99, 102, 241, 0.1);
+        }
+        .node-final {
+            background: linear-gradient(135deg, #4f46e5, #312e81);
+            border: 1px solid #818cf8;
+            box-shadow: 0 0 40px rgba(99, 102, 241, 0.4);
+            animation: pulse-glow 2s infinite alternate;
+            z-index: 30;
+        }
+        .node-final.active-node,
+        .node-item:hover.node-final {
+            z-index: 40;
+        }
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
+            100% { box-shadow: 0 0 50px rgba(99, 102, 241, 0.7); }
+        }
+
+        /* Marquee-фон в hero: единая шкала кегля и интервалов на всех устройствах */
+        .marquee-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            row-gap: clamp(0.35rem, 2.5vmin, 2.5rem);
+            -webkit-mask-image: linear-gradient(to bottom, black 0%, black 90%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 0%, black 90%, transparent 100%);
+        }
+        .marquee-row {
+            display: flex;
+            overflow: hidden;
+            width: 100%;
+            flex: 0 0 auto;
+            min-height: 0;
+            align-items: center;
+        }
+        .marquee-track {
+            display: flex;
+            flex-shrink: 0;
+            align-items: center;
+            gap: clamp(1.25rem, 0.22em, 4rem);
+            padding-right: clamp(1.25rem, 0.22em, 4rem);
+            font-family: 'Manrope', 'Space Grotesk', sans-serif;
+            font-weight: 800;
+            font-size: clamp(3rem, min(14vw, 18vmin), 16rem);
+            line-height: 0.9;
+            letter-spacing: -0.04em;
+            white-space: nowrap;
+            color: rgba(165, 180, 252, 0.2);
+            will-change: transform;
+        }
+        .marquee-track-ltr { animation: marquee-ltr 70s linear infinite; }
+        .marquee-track-rtl { animation: marquee-rtl 70s linear infinite; }
+
+        @keyframes marquee-ltr {
+            from { transform: translate3d(-50%, 0, 0); }
+            to   { transform: translate3d(0, 0, 0); }
+        }
+        @keyframes marquee-rtl {
+            from { transform: translate3d(0, 0, 0); }
+            to   { transform: translate3d(-50%, 0, 0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .marquee-track-ltr, .marquee-track-rtl { animation: none; }
+            #global-marquee-layer .marquee-track-ltr,
+            #global-marquee-layer .marquee-track-rtl { animation: none; }
+        }
+        /* Мобильный слой: на 30% медленнее (70s → 91s) */
+        @media (max-width: 767.98px) {
+            #global-marquee-layer .marquee-track-ltr { animation-duration: 91s; }
+            #global-marquee-layer .marquee-track-rtl { animation-duration: 91s; }
+        }
+
+        /* Мобильный полноэкранный слой USEMOGUCHIY / UPGRADE (маска задаётся в JS по #marquee-mobile-cutoff) */
+        @media (max-width: 767.98px) {
+            #global-marquee-layer {
+                -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 50%, transparent 70%);
+                mask-image: linear-gradient(to bottom, #000 0%, #000 50%, transparent 70%);
+            }
+        }
+        /* Тот же ритм и заполнение, что у .marquee-bg в hero (без нижней маски — её даёт #global-marquee-layer в JS) */
+        .marquee-bg--fill {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            row-gap: clamp(0.35rem, 2.5vmin, 2.5rem);
+            overflow: hidden;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        /* Display-стиль для заголовков блоков сравнения */
+        .display-title {
+            font-family: 'Manrope', 'Space Grotesk', sans-serif;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+            line-height: 1.05;
+        }
+        .display-sub {
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        /* Поп-ап для нод схемы */
+        #node-popup {
+            position: fixed;
+            z-index: 9999;
+            width: min(320px, calc(100vw - 32px));
+            background: linear-gradient(145deg, rgba(30, 27, 75, 0.95), rgba(5, 5, 7, 0.95));
+            border: 1px solid rgba(99, 102, 241, 0.5);
+            border-radius: 16px;
+            padding: 20px 24px;
+            box-shadow: 0 0 50px rgba(99, 102, 241, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: #f8fafc;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+        #node-popup.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.95);
+        }
+        #node-popup h4 {
+            color: #a5b4fc;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            padding-right: 24px;
+        }
+        #node-popup p {
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        #node-popup-close {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            color: #64748b;
+            background: none;
+            border: none;
+            font-size: 22px;
+            line-height: 1;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        #node-popup-close:hover { color: #fff; }
+
+        #node-popup-tail {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9998;
+            pointer-events: none;
+        }
+
+        .node-item.selected-node {
+            background: rgba(99, 102, 241, 0.15) !important;
+            border-color: rgba(99, 102, 241, 0.9) !important;
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.6) !important;
+            transform: scale(1.05);
+        }
+
+        /* Ужасный дизайн для первого прототипа */
+        .bad-site {
+            background: #000080;
+            color: #ffff00;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            text-align: center;
+        }
+        .bad-button {
+            background: #ff0000;
+            color: #fff;
+            border: 5px solid #00ff00;
+            animation: blink 0.5s infinite;
+        }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* Сравнение: на мобиле текст на всю ширину, мокап снизу; с md — две колонки */
+        .comparison-row {
+            position: relative;
+            display: grid;
+            grid-template-columns: 1fr;
+            align-items: start;
+            gap: 1.5rem;
+        }
+        @media (min-width: 768px) {
+            .comparison-row {
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                gap: 3rem;
+                align-items: center;
+            }
+        }
+
+        .mockup-frame {
+            width: 100%;
+            min-height: 220px;
+            height: clamp(220px, 52vw, 500px);
+            max-height: min(56vh, 500px);
+        }
+        @media (min-width: 768px) {
+            .mockup-frame { height: 500px; min-height: 500px; max-height: none; }
+        }
+        .mockup-frame--tall {
+            min-height: 260px;
+            height: clamp(260px, 58vw, 600px);
+            max-height: min(62vh, 600px);
+        }
+        @media (min-width: 768px) {
+            .mockup-frame--tall { height: 600px; min-height: 600px; max-height: none; }
+        }
+
+        /* Фото в сравнении: плавающая рамка + полноэкранное увеличение с размытием фона */
+        .comparison-float-slot {
+            width: 100%;
+            min-height: 220px;
+            height: clamp(220px, 52vw, 500px);
+            max-height: min(56vh, 500px);
+        }
+        @media (min-width: 768px) {
+            .comparison-float-slot { height: 500px; min-height: 500px; max-height: none; }
+        }
+        .comparison-float-slot--tall {
+            min-height: 260px;
+            height: clamp(260px, 58vw, 600px);
+            max-height: min(62vh, 600px);
+        }
+        @media (min-width: 768px) {
+            .comparison-float-slot--tall { height: 600px; min-height: 600px; max-height: none; }
+        }
+        .comparison-float-trigger {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-height: 0;
+            text-align: left;
+            cursor: zoom-in;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            background: transparent;
+            border: none;
+            padding: 0;
+            margin: 0;
+            font: inherit;
+            color: inherit;
+        }
+        .comparison-float-trigger:focus-visible {
+            outline: 2px solid rgba(129, 140, 248, 0.95);
+            outline-offset: 3px;
+        }
+        .comparison-float-frame {
+            position: relative;
+            display: flex;
+            width: 100%;
+            height: 100%;
+            min-height: 200px;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.04);
+        }
+        @media (min-width: 640px) {
+            .comparison-float-frame { border-radius: 1rem; }
+        }
+        .comparison-float-frame::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: rgba(0, 0, 0, 0);
+            transition: background 0.35s ease;
+            pointer-events: none;
+            z-index: 1;
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .comparison-float-trigger:hover .comparison-float-frame::after {
+                background: rgba(0, 0, 0, 0.2);
+            }
+        }
+        .comparison-float-img {
+            width: 100%;
+            height: 100%;
+            min-height: 200px;
+            object-fit: cover;
+            object-position: center top;
+            display: block;
+            transform-origin: center center;
+            animation: comparison-float-idle 12s ease-in-out infinite;
+        }
+        @keyframes comparison-float-idle {
+            0%, 100% { transform: translate3d(0, 0, 0); }
+            50% { transform: translate3d(0, -8px, 0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .comparison-float-img { animation: none; }
+        }
+
+        .comparison-float-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 2500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: min(5vw, 1.5rem);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            /* при закрытии — плавное исчезновение; размытие не привязано к длинной fade-in */
+            transition: opacity 0.38s ease, visibility 0.38s ease;
+        }
+        .comparison-float-overlay.is-open {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            /* в момент нажатия слой с blur сразу непрозрачен, параллельно крутится только scale у картинки */
+            transition: opacity 0s linear, visibility 0s linear;
+        }
+        .comparison-float-overlay__shade {
+            position: absolute;
+            inset: 0;
+            background: rgba(5, 5, 7, 0.5);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            cursor: zoom-out;
+            will-change: backdrop-filter;
+        }
+        .comparison-float-overlay__stage {
+            position: relative;
+            z-index: 1;
+            margin: 0;
+            max-width: min(96vw, 1120px);
+            max-height: min(88vh, 900px);
+            border-radius: 1.25rem;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            box-shadow: 0 28px 80px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(99, 102, 241, 0.18);
+            cursor: zoom-out;
+            transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+            transform: scale(0.88);
+        }
+        .comparison-float-overlay.is-open .comparison-float-overlay__stage {
+            transform: scale(1.05);
+        }
+        .comparison-float-overlay__drift {
+            display: block;
+            line-height: 0;
+            will-change: transform;
+        }
+        .comparison-float-overlay.is-open .comparison-float-overlay__drift {
+            animation: comparison-float-expand-drift 18s ease-in-out infinite;
+        }
+        @keyframes comparison-float-expand-drift {
+            0%, 100% { transform: translate3d(-6px, 5px, 0) rotate(-1.1deg); }
+            50% { transform: translate3d(10px, -8px, 0) rotate(1.2deg); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .comparison-float-overlay.is-open .comparison-float-overlay__drift { animation: none; }
+            .comparison-float-overlay.is-open .comparison-float-overlay__stage { transform: scale(1); }
+        }
+
+        #graph-inner {
+            position: relative;
+            width: 100%;
+            max-width: 72rem;
+            margin-left: auto;
+            margin-right: auto;
+            min-height: auto;
+            height: auto;
+        }
+        @media (min-width: 768px) {
+            #graph-inner {
+                min-height: 0;
+                height: 500px;
+            }
+        }
+
+        /* Кнопки Instagram / YouTube из-под аватарки */
+        #avatar-hub {
+            --ah: 6rem;
+        }
+        @media (min-width: 640px) {
+            #avatar-hub { --ah: 8rem; }
+        }
+        @media (min-width: 768px) {
+            #avatar-hub { --ah: 10rem; }
+        }
+        @media (min-width: 1024px) {
+            #avatar-hub { --ah: 12rem; }
+        }
+        #avatar-hub .avatar-fly-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            z-index: 10;
+            white-space: nowrap;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #fff;
+            background: rgba(79, 70, 229, 0.45);
+            border: 1px solid rgba(165, 180, 252, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+            cursor: pointer;
+            transition: left 0.38s cubic-bezier(0.34, 1.45, 0.64, 1),
+                transform 0.38s cubic-bezier(0.34, 1.45, 0.64, 1),
+                opacity 0.32s ease;
+            opacity: 0;
+            pointer-events: none;
+            transform: translate(-50%, -50%) scale(0.45);
+        }
+        #avatar-hub.avatar-hub--open .avatar-fly-btn {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #avatar-hub.avatar-hub--open .avatar-fly-btn--left {
+            left: calc(50% - var(--ah) - 0.5rem);
+            transform: translate(-100%, -50%) scale(1);
+        }
+        #avatar-hub.avatar-hub--open .avatar-fly-btn--right {
+            left: calc(50% + var(--ah) + 0.5rem);
+            transform: translate(0, -50%) scale(1);
+        }
+
+        #graph-nodes-wrap {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem 0.5rem;
+            width: 100%;
+        }
+        @media (min-width: 768px) {
+            #graph-nodes-wrap {
+                position: absolute;
+                inset: 0;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: 2.5rem 0;
+                gap: 0;
+            }
+        }
+
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-500 selection:text-white relative">
+
+    <!-- Scroll Indicator -->
+    <div id="scroll-progress"></div>
+    <div id="comparison-float-overlay" class="comparison-float-overlay" aria-hidden="true">
+        <div class="comparison-float-overlay__shade" aria-hidden="true"></div>
+        <figure class="comparison-float-overlay__stage">
+            <div class="comparison-float-overlay__drift">
+                <img id="comparison-float-overlay-img" src="" alt="" class="block max-w-[min(94vw,1120px)] max-h-[min(82vh,860px)] w-auto h-auto object-contain bg-black/20" width="1200" height="800" decoding="async">
+            </div>
+        </figure>
+    </div>
+
+    <!-- Marquee на весь экран только на мобиле; гаснет у заголовка «Вы не теряете…» -->
+    <div id="global-marquee-layer" class="fixed inset-0 z-[1] pointer-events-none overflow-hidden md:hidden" aria-hidden="true">
+        <div class="marquee-bg--fill" id="global-marquee-inner"></div>
+    </div>
+
+    <!-- Background Blobs -->
+    <div class="blob bg-brand-900 w-[500px] h-[500px] rounded-full top-0 left-[-100px]"></div>
+    <div class="blob bg-indigo-900 w-[600px] h-[600px] rounded-full bottom-0 right-[-200px]" style="animation-delay: -5s;"></div>
+
+    <!-- ==================== 1. HERO ==================== -->
+    <header class="relative z-[10] min-h-[90vh] flex items-center justify-center pt-20 pb-10 overflow-hidden">
+        <div class="marquee-bg hidden md:flex" aria-hidden="true">
+            <div class="marquee-row">
+                <div class="marquee-track marquee-track-ltr">
+                    <span>USEMOGUCHIY</span><span>USEMOGUCHIY</span><span>USEMOGUCHIY</span><span>USEMOGUCHIY</span>
+                    <span>USEMOGUCHIY</span><span>USEMOGUCHIY</span><span>USEMOGUCHIY</span><span>USEMOGUCHIY</span>
+                </div>
+            </div>
+            <div class="marquee-row">
+                <div class="marquee-track marquee-track-rtl">
+                    <span>UPGRADE</span><span>UPGRADE</span><span>UPGRADE</span><span>UPGRADE</span>
+                    <span>UPGRADE</span><span>UPGRADE</span><span>UPGRADE</span><span>UPGRADE</span>
+                </div>
+            </div>
+            <div class="marquee-row">
+                <div class="marquee-track marquee-track-ltr">
+                    <span>USEMOGUCHIY</span><span>USEMOGUCHIY</span><span>USEMOGUCHIY</span><span>USEMOGUCHIY</span>
+                    <span>USEMOGUCHIY</span><span>USEMOGUCHIY</span><span>USEMOGUCHIY</span><span>USEMOGUCHIY</span>
+                </div>
+            </div>
+            <div class="marquee-row">
+                <div class="marquee-track marquee-track-rtl">
+                    <span>UPGRADE</span><span>UPGRADE</span><span>UPGRADE</span><span>UPGRADE</span>
+                    <span>UPGRADE</span><span>UPGRADE</span><span>UPGRADE</span><span>UPGRADE</span>
+                </div>
+            </div>
+            <div class="marquee-row">
+                <div class="marquee-track marquee-track-ltr">
+                    <span>USEMOGUCHIY</span><span>USEMOGUCHIY</span><span>USEMOGUCHIY</span><span>USEMOGUCHIY</span>
+                    <span>USEMOGUCHIY</span><span>USEMOGUCHIY</span><span>USEMOGUCHIY</span><span>USEMOGUCHIY</span>
+                </div>
+            </div>
+        </div>
+        <div class="container mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 md:grid-rows-[auto_auto] gap-6 md:gap-12 items-center relative z-10 min-w-0 w-full max-w-6xl">
+            
+            <div class="flex flex-col items-center text-center md:items-start md:text-left space-y-4 md:space-y-6 lg:space-y-8 min-w-0 w-full md:col-start-1 md:row-start-1">
+                <div class="inline-block px-3 py-1.5 sm:px-4 sm:py-1.5 rounded-full glass text-brand-400 text-xs sm:text-sm font-semibold tracking-wide border-brand-500/30 uppercase reveal">
+                    Usemoguchiy Upgrade
+                </div>
+                <h1 class="text-3xl sm:text-4xl md:text-4xl lg:text-6xl xl:text-7xl font-bold leading-tight reveal max-w-3xl mx-auto md:mx-0" style="transition-delay: 0.1s;">
+                    Мы превращаем сайты в <span class="text-gradient">систему привлечения клиентов</span>
+                </h1>
+                <p class="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-400 font-light reveal max-w-2xl mx-auto md:mx-0" style="transition-delay: 0.2s;">
+                    Не просто дизайн.<br>
+                    <span class="text-white font-medium">Мы находим, где бизнес теряет деньги — и выстраиваем структуру, которая приводит лиды.</span>
+                </p>
+
+                <div class="flex flex-wrap gap-2 reveal justify-center md:justify-start" style="transition-delay: 0.25s;">
+                    <span class="px-3 py-1.5 glass border border-brand-500/30 rounded-full text-xs md:text-sm text-brand-300">+ Рост заявок</span>
+                    <span class="px-3 py-1.5 glass border border-brand-500/30 rounded-full text-xs md:text-sm text-brand-300">+ Выше конверсия</span>
+                    <span class="px-3 py-1.5 glass border border-brand-500/30 rounded-full text-xs md:text-sm text-brand-300">+ Понятная система продаж</span>
+                </div>
+
+                <div class="hidden md:flex flex-col sm:flex-row gap-4 pt-2 reveal justify-start w-full" style="transition-delay: 0.3s;">
+                    <button type="button" onclick="document.getElementById('comparison').scrollIntoView()" class="px-8 py-4 bg-brand-600 text-white hover:bg-white hover:text-brand-600 border border-brand-600 hover:border-white rounded-xl font-semibold transition-all duration-300 shadow-[0_0_20px_rgba(79,70,229,0.4)] hover:-translate-y-1">
+                        Как это работает
+                    </button>
+                    <button type="button" onclick="document.getElementById('form-section').scrollIntoView()" class="px-8 py-4 bg-white text-black hover:bg-black hover:text-white border border-white rounded-xl font-semibold transition-all duration-300">
+                        Получить бесплатный аудит
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex justify-center md:justify-end min-w-0 w-full reveal relative md:col-start-2 md:row-start-1 md:row-span-2">
+                <div id="avatar-hub" class="relative shrink-0 w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 lg:w-96 lg:h-96">
+                    <button type="button" class="avatar-fly-btn avatar-fly-btn--left" id="avatar-btn-insta" aria-hidden="true">Instagram</button>
+                    <button type="button" class="avatar-fly-btn avatar-fly-btn--right" id="avatar-btn-yt" aria-hidden="true">YouTube</button>
+                    <div id="avatar-trigger" class="relative z-20 w-full h-full rounded-full p-2 bg-gradient-to-tr from-brand-600 to-purple-500 animate-[pulse-glow_4s_infinite_alternate] cursor-pointer select-none" role="button" tabindex="0" aria-expanded="false" aria-label="Показать ссылки на соцсети">
+                        <img src="images/ava.jpeg" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop'" alt="" class="pointer-events-none w-full h-full object-cover rounded-full border-4 border-dark" width="400" height="400">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3 w-full max-w-md mx-auto md:max-w-none md:mx-0 md:col-start-1 md:row-start-2 reveal md:hidden" style="transition-delay: 0.3s;">
+                <button type="button" onclick="document.getElementById('comparison').scrollIntoView()" class="w-full px-6 py-4 bg-brand-600 text-white hover:bg-white hover:text-brand-600 border border-brand-600 hover:border-white rounded-xl font-semibold transition-all duration-300 shadow-[0_0_20px_rgba(79,70,229,0.4)]">
+                    Как это работает
+                </button>
+                <button type="button" onclick="document.getElementById('form-section').scrollIntoView()" class="w-full px-6 py-4 bg-white text-black hover:bg-black hover:text-white border border-white rounded-xl font-semibold transition-all duration-300 text-center leading-snug">
+                    Получить бесплатный аудит
+                </button>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- ==================== 2. БЛОК СРАВНЕНИЯ ==================== -->
+    <section id="comparison" class="py-24 relative z-10">
+        <div class="container mx-auto px-6 space-y-32">
+            
+            <!-- 1. Самодельный сайт -->
+            <div class="comparison-row reveal max-md:relative max-md:z-[2] max-md:bg-[#050507] max-md:rounded-xl max-md:-mx-1 max-md:px-1">
+                <div class="min-w-0 w-full space-y-4 md:space-y-6">
+                    <div class="w-12 h-1 bg-red-500 rounded"></div>
+                    <h2 id="marquee-mobile-cutoff" class="display-title text-2xl sm:text-3xl md:text-5xl lg:text-7xl leading-tight relative z-[11]">
+                        Вы не <span class="text-red-500">теряете</span> клиентов. Вы их даже не получаете.
+                    </h2>
+                    <p class="display-sub text-base md:text-lg text-gray-300 max-w-none md:max-w-xl">
+                        Сайт без системы — это не воронка, а заглушка. Поток лидов нулевой, потому что бизнес не понимает, кому и что он продаёт.
+                    </p>
+                    <ul class="space-y-2 text-gray-400 text-base">
+                        <li class="flex items-center gap-3"><span class="text-red-500 shrink-0">✕</span> Нет потока лидов</li>
+                        <li class="flex items-center gap-3"><span class="text-red-500 shrink-0">✕</span> Нет структуры</li>
+                        <li class="flex items-center gap-3"><span class="text-red-500 shrink-0">✕</span> Нет понимания клиента</li>
+                    </ul>
+                </div>
+                <div class="min-w-0 w-full glass-panel rounded-xl sm:rounded-2xl p-1 sm:p-2 comparison-float-slot glow-box flex flex-col relative group">
+                    <button type="button" class="comparison-float-trigger flex-1 min-h-0 flex flex-col" data-comparison-float-src="images/first.png" data-comparison-float-alt="Пример самодельного сайта" aria-expanded="false" aria-haspopup="dialog" aria-label="Показать крупнее пример самодельного сайта">
+                        <span class="comparison-float-frame flex-1 min-h-0">
+                            <img src="images/first.png" alt="Пример самодельного сайта" class="comparison-float-img flex-1 min-h-0 w-full h-full object-cover" width="1200" height="800" loading="lazy" decoding="async">
+                        </span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. Фрилансер -->
+            <div class="comparison-row reveal">
+                <div class="min-w-0 w-full space-y-4 md:space-y-6">
+                    <div class="w-12 h-1 bg-yellow-500 rounded"></div>
+                    <h2 class="display-title text-2xl sm:text-3xl md:text-5xl lg:text-7xl leading-tight">
+                        Сайт есть. <span class="text-yellow-500">Результата — нет.</span>
+                    </h2>
+                    <p class="display-sub text-base md:text-lg text-gray-300 max-w-none md:max-w-xl">
+                        Картинка собрана, кнопки работают. Но это просто визитка — без логики продаж и без стратегии.
+                    </p>
+                    <ul class="space-y-2 text-gray-400 text-base">
+                        <li class="flex items-center gap-3"><span class="text-yellow-500 shrink-0">⚠</span> Нет системы</li>
+                        <li class="flex items-center gap-3"><span class="text-yellow-500 shrink-0">⚠</span> Нет конверсии</li>
+                        <li class="flex items-center gap-3"><span class="text-yellow-500 shrink-0">⚠</span> Нет стратегии</li>
+                    </ul>
+                </div>
+                <div class="min-w-0 w-full glass-panel rounded-xl sm:rounded-2xl p-1 sm:p-2 comparison-float-slot flex flex-col relative">
+                    <button type="button" class="comparison-float-trigger flex-1 min-h-0 flex flex-col" data-comparison-float-src="images/two.png" data-comparison-float-alt="Пример шаблонного сайта" aria-expanded="false" aria-haspopup="dialog" aria-label="Показать крупнее пример типового сайта">
+                        <span class="comparison-float-frame flex-1 min-h-0">
+                            <img src="images/two.png" alt="Пример шаблонного сайта" class="comparison-float-img flex-1 min-h-0 w-full h-full object-cover" width="1200" height="800" loading="lazy" decoding="async">
+                        </span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3. Работа с нами -->
+            <div class="comparison-row reveal relative">
+                <div class="absolute inset-0 bg-brand-500/5 blur-[100px] rounded-full z-[-1] pointer-events-none"></div>
+                
+                <div class="min-w-0 w-full space-y-4 md:space-y-6 relative z-0">
+                    <div class="w-12 h-1 bg-brand-400 rounded glow-box"></div>
+                    <h2 class="display-title text-xl sm:text-2xl md:text-5xl lg:text-7xl leading-tight">
+                        Мы не улучшаем сайт. <span class="text-gradient glow-text">Мы перестраиваем бизнес под поток клиентов.</span>
+                    </h2>
+                    <p class="display-sub text-base md:text-lg text-gray-300 max-w-none md:max-w-xl">
+                        Сайт — лишь верхушка. Под ней архитектура продаж, оффер и логика, которая ведёт клиента к покупке.
+                    </p>
+                    <ul class="space-y-2 text-gray-300 text-base">
+                        <li class="flex items-center gap-3"><span class="text-brand-400 shrink-0">✓</span> Акцент на лиды</li>
+                        <li class="flex items-center gap-3"><span class="text-brand-400 shrink-0">✓</span> Акцент на деньги</li>
+                        <li class="flex items-center gap-3"><span class="text-brand-400 shrink-0">✓</span> Акцент на систему</li>
+                    </ul>
+                </div>
+
+                <div class="min-w-0 w-full glass-panel rounded-xl sm:rounded-2xl p-1 sm:p-2 comparison-float-slot comparison-float-slot--tall flex flex-col border border-brand-500/40 shadow-[0_0_50px_rgba(99,102,241,0.2)] relative z-0">
+                    <button type="button" class="comparison-float-trigger flex-1 min-h-0 flex flex-col" data-comparison-float-src="images/three.png" data-comparison-float-alt="Пример премиального сайта" aria-expanded="false" aria-haspopup="dialog" aria-label="Показать крупнее пример премиального сайта">
+                        <span class="comparison-float-frame flex-1 min-h-0">
+                            <img src="images/three.png" alt="Пример премиального сайта" class="comparison-float-img flex-1 min-h-0 w-full h-full object-cover" width="1200" height="800" loading="lazy" decoding="async">
+                        </span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ==================== 2.5 ПОЧЕМУ БИЗНЕС НЕ ЗАРАБАТЫВАЕТ ==================== -->
+    <section class="py-24 relative z-10 border-y border-white/5">
+        <div class="container mx-auto px-6 max-w-5xl reveal">
+            <div class="text-center mb-12">
+                <div class="w-12 h-1 bg-red-500/70 rounded mx-auto mb-6"></div>
+                <h2 class="display-title text-4xl md:text-5xl lg:text-6xl mb-4">
+                    Почему бизнес <span class="text-red-500">не зарабатывает</span>
+                </h2>
+                <p class="display-sub text-base md:text-lg text-gray-300 max-w-2xl mx-auto">
+                    Проблема не в трафике. Проблема в том, что сайт не конвертирует.
+                </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="glass p-6 rounded-2xl border border-white/5 flex items-start gap-4">
+                    <span class="text-2xl text-red-400 mt-0.5">01</span>
+                    <p class="text-gray-300">Клиент не понимает, что ему предлагают</p>
+                </div>
+                <div class="glass p-6 rounded-2xl border border-white/5 flex items-start gap-4">
+                    <span class="text-2xl text-red-400 mt-0.5">02</span>
+                    <p class="text-gray-300">Нет доверия</p>
+                </div>
+                <div class="glass p-6 rounded-2xl border border-white/5 flex items-start gap-4">
+                    <span class="text-2xl text-red-400 mt-0.5">03</span>
+                    <p class="text-gray-300">Нет пути к покупке</p>
+                </div>
+                <div class="glass p-6 rounded-2xl border border-white/5 flex items-start gap-4">
+                    <span class="text-2xl text-red-400 mt-0.5">04</span>
+                    <p class="text-gray-300">Нет смысла в структуре</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 2.7 ОФФЕР ==================== -->
+    <section class="py-32 relative z-10">
+        <div class="absolute inset-0 bg-brand-900/20 blur-[140px] rounded-full max-w-4xl mx-auto z-[-1]"></div>
+        <div class="container mx-auto px-6 max-w-5xl reveal">
+            <div class="glass-panel rounded-3xl p-10 md:p-16 border border-brand-500/30 shadow-[0_0_60px_rgba(99,102,241,0.15)]">
+                <div class="text-center mb-12">
+                    <span class="inline-block px-3 py-1 rounded-full text-xs uppercase tracking-widest text-brand-300 border border-brand-500/40 mb-6">Наш оффер</span>
+                    <h2 class="display-title text-4xl md:text-5xl lg:text-6xl">
+                        Мы увеличим количество <span class="text-gradient glow-text">заявок</span> через переработку структуры сайта и бизнес-логики
+                    </h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="glass p-6 rounded-2xl border border-white/5 hover:border-brand-500/40 transition">
+                        <div class="text-xs uppercase tracking-widest text-brand-400 mb-2">Результат</div>
+                        <p class="text-white font-semibold text-lg leading-snug">Рост лидов и заявок</p>
+                    </div>
+                    <div class="glass p-6 rounded-2xl border border-white/5 hover:border-brand-500/40 transition">
+                        <div class="text-xs uppercase tracking-widest text-brand-400 mb-2">Срок</div>
+                        <p class="text-white font-semibold text-lg leading-snug">30–90 дней</p>
+                    </div>
+                    <div class="glass p-6 rounded-2xl border border-white/5 hover:border-brand-500/40 transition">
+                        <div class="text-xs uppercase tracking-widest text-brand-400 mb-2">Гарантия</div>
+                        <p class="text-white font-semibold text-lg leading-snug">Работаем до результата</p>
+                    </div>
+                    <div class="glass p-6 rounded-2xl border border-white/5 hover:border-brand-500/40 transition">
+                        <div class="text-xs uppercase tracking-widest text-brand-400 mb-2">Подход</div>
+                        <p class="text-white font-semibold text-lg leading-snug">Системный, не косметический</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 3. ПРЕИМУЩЕСТВА ==================== -->
+    <section class="py-20 relative z-10 border-y border-white/5 bg-dark/50 backdrop-blur-sm">
+        <div class="container mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 reveal">
+                
+                <div class="glass p-8 rounded-2xl border border-white/5 hover:border-brand-500/50 transition duration-500 group relative overflow-hidden">
+                    <div class="absolute inset-0 bg-brand-500/5 opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                    <p class="text-lg font-medium text-gray-300 relative z-10 group-hover:text-white transition">
+                        Мы не рисуем дизайн — <br><span class="text-brand-400">мы строим воронки</span>
+                    </p>
+                </div>
+
+                <div class="glass p-8 rounded-2xl border border-white/5 hover:border-brand-500/50 transition duration-500 group relative overflow-hidden">
+                    <div class="absolute inset-0 bg-brand-500/5 opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                    <p class="text-lg font-medium text-gray-300 relative z-10 group-hover:text-white transition">
+                        Мы не делаем “красиво” — <br><span class="text-brand-400">мы делаем “продающе”</span>
+                    </p>
+                </div>
+
+                <div class="glass p-8 rounded-2xl border border-white/5 hover:border-brand-500/50 transition duration-500 group relative overflow-hidden">
+                    <div class="absolute inset-0 bg-brand-500/5 opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                    <p class="text-lg font-medium text-gray-300 relative z-10 group-hover:text-white transition">
+                        Мы не копируем — <br><span class="text-brand-400">мы создаём уникальность</span>
+                    </p>
+                </div>
+
+                <div class="glass p-8 rounded-2xl border border-white/5 hover:border-brand-500/50 transition duration-500 group relative overflow-hidden">
+                    <div class="absolute inset-0 bg-brand-500/5 opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                    <p class="text-lg font-medium text-gray-300 relative z-10 group-hover:text-white transition">
+                        Мы не просто делаем сайт — <br><span class="text-brand-400">мы внедряем систему</span>
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 4 & 5. СИСТЕМА (NODE GRAPH) & ИНТЕРАКТИВ ==================== -->
+    <div class="container mx-auto px-6 pt-24 pb-4 reveal">
+        <h2 class="display-title text-5xl md:text-6xl lg:text-7xl text-center text-gradient glow-text">
+            Наша адаптивная система
+        </h2>
+    </div>
+    <section class="py-8 md:py-32 relative z-10 flex flex-col items-stretch justify-start md:items-center md:justify-center md:min-h-[800px] overflow-hidden w-full" id="system-section">
+        
+        <canvas id="particle-canvas" class="absolute inset-0 z-50 pointer-events-none"></canvas>
+
+        <!-- Overlay Blur & Button -->
+        <div id="unlock-overlay" class="absolute inset-0 z-40 flex flex-col items-center justify-center bg-[#050507]/60 backdrop-blur-xl transition-all duration-1000">
+            <h2 class="text-3xl md:text-5xl font-bold mb-10 text-white/80 text-center px-4">Секрет высокой конверсии</h2>
+            <button type="button" id="unlock-btn" class="px-10 py-5 glass border-brand-500/50 hover:bg-brand-500/20 text-xl font-bold rounded-2xl transition duration-300 shadow-[0_0_30px_rgba(99,102,241,0.2)] hover:shadow-[0_0_50px_rgba(99,102,241,0.5)] glow-text text-white relative group overflow-hidden">
+                <span class="relative z-10">Как это работает?</span>
+                <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
+            </button>
+        </div>
+
+        <!-- Node Graph Container -->
+        <div id="graph-container" class="container mx-auto px-4 relative z-20 w-full max-w-full h-full opacity-0 transition-opacity duration-1000">
+            <div id="graph-inner">
+                <canvas id="graph-lines" class="absolute inset-0 z-0 pointer-events-none"></canvas>
+                
+                <!-- Nodes Layout -->
+                <div id="graph-nodes-wrap">
+                    
+                    <!-- Col 1 -->
+                    <div class="flex flex-col gap-3 md:gap-20 w-full max-w-xs md:max-w-none md:w-auto justify-center items-stretch">
+                        <div class="node-item glass px-3 py-2 sm:px-6 sm:py-3 rounded-xl border border-white/10 text-xs sm:text-sm md:text-base font-medium text-center" data-id="1">Анализ бизнеса</div>
+                        <div class="node-item glass px-3 py-2 sm:px-6 sm:py-3 rounded-xl border border-white/10 text-xs sm:text-sm md:text-base font-medium text-center" data-id="2">Поиск узких мест</div>
+                    </div>
+
+                    <!-- Col 2 -->
+                    <div class="flex flex-col gap-3 md:gap-32 w-full max-w-xs md:max-w-none md:w-auto justify-center items-stretch">
+                        <div class="node-item glass px-3 py-2 sm:px-6 sm:py-3 rounded-xl border border-white/10 text-xs sm:text-sm md:text-base font-medium text-center border-brand-500/30" data-id="3">Понимание ЦА</div>
+                        <div class="node-item glass px-3 py-2 sm:px-6 sm:py-3 rounded-xl border border-white/10 text-xs sm:text-sm md:text-base font-medium text-center" data-id="4">Формирование оффера</div>
+                    </div>
+
+                    <!-- Col 3 -->
+                    <div class="flex flex-col gap-3 md:gap-12 w-full max-w-xs md:max-w-none md:w-auto justify-center items-stretch">
+                        <div class="node-item glass px-3 py-2 sm:px-6 sm:py-3 rounded-xl border border-white/10 text-xs sm:text-sm md:text-base font-medium text-center" data-id="5">Архитектура сайта</div>
+                        <div class="node-item glass px-3 py-2 sm:px-6 sm:py-3 rounded-xl border border-white/10 text-xs sm:text-sm md:text-base font-medium text-center" data-id="6">Контент</div>
+                        <div class="node-item glass px-3 py-2 sm:px-6 sm:py-3 rounded-xl border border-white/10 text-xs sm:text-sm md:text-base font-medium text-center" data-id="7">UX</div>
+                    </div>
+
+                    <!-- Col 4 -->
+                    <div class="flex flex-col gap-3 w-full max-w-xs md:max-w-none md:w-auto justify-center items-stretch">
+                        <div class="node-item glass px-4 py-3 sm:px-8 sm:py-4 rounded-xl border border-brand-400/50 text-sm sm:text-base md:text-lg font-bold text-center text-brand-300 shadow-[0_0_20px_rgba(99,102,241,0.2)]" data-id="8">Конверсия</div>
+                    </div>
+
+                    <!-- Final Node -->
+                    <div class="flex flex-col justify-center w-full max-w-xs md:max-w-none md:w-auto items-stretch">
+                        <div class="node-item node-final px-6 py-4 sm:px-10 sm:py-5 rounded-2xl text-base sm:text-xl md:text-2xl font-bold text-center text-white" data-id="9">💰 Рост клиентов</div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 6. СТРАТЕГИЯ (ПОШАГОВО) ==================== -->
+    <section class="py-24 relative z-10 bg-[#08080c]">
+        <div class="container mx-auto px-6 max-w-4xl reveal">
+            <h2 class="text-3xl md:text-5xl font-bold text-center mb-16">Как мы работаем</h2>
+            
+            <div class="space-y-4">
+                <!-- Step 1 -->
+                <div class="glass rounded-xl overflow-hidden group accordion-item border border-white/5 transition-all duration-300 hover:border-brand-500/30">
+                    <button class="w-full px-8 py-6 text-left flex justify-between items-center focus:outline-none" onclick="toggleAccordion(this)">
+                        <div class="flex items-center gap-6">
+                            <span class="text-2xl font-bold text-brand-500/50 group-hover:text-brand-400 transition">01</span>
+                            <span class="text-xl font-semibold">Определяем рынок и боль</span>
+                        </div>
+                        <span class="text-2xl transform transition-transform duration-300 icon">+</span>
+                    </button>
+                    <div class="content max-h-0 overflow-hidden transition-all duration-500 ease-in-out bg-black/20">
+                        <div class="px-8 pb-6 pt-2 text-gray-400 text-lg border-l-2 border-brand-500 ml-12">
+                            Изучаем рынок и реальную боль клиента до того, как что-то проектировать. Без этого любой сайт — догадка.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="glass rounded-xl overflow-hidden group accordion-item border border-white/5 transition-all duration-300 hover:border-brand-500/30">
+                    <button class="w-full px-8 py-6 text-left flex justify-between items-center focus:outline-none" onclick="toggleAccordion(this)">
+                        <div class="flex items-center gap-6">
+                            <span class="text-2xl font-bold text-brand-500/50 group-hover:text-brand-400 transition">02</span>
+                            <span class="text-xl font-semibold">Формируем оффер под клиента</span>
+                        </div>
+                        <span class="text-2xl transform transition-transform duration-300 icon">+</span>
+                    </button>
+                    <div class="content max-h-0 overflow-hidden transition-all duration-500 ease-in-out bg-black/20">
+                        <div class="px-8 pb-6 pt-2 text-gray-400 text-lg border-l-2 border-brand-500 ml-12">
+                            Собираем оффер по формуле «результат + срок + гарантия + объяснение». Это превращает «интересно» в «беру».
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="glass rounded-xl overflow-hidden group accordion-item border border-white/5 transition-all duration-300 hover:border-brand-500/30">
+                    <button class="w-full px-8 py-6 text-left flex justify-between items-center focus:outline-none" onclick="toggleAccordion(this)">
+                        <div class="flex items-center gap-6">
+                            <span class="text-2xl font-bold text-brand-500/50 group-hover:text-brand-400 transition">03</span>
+                            <span class="text-xl font-semibold">Строим систему</span>
+                        </div>
+                        <span class="text-2xl transform transition-transform duration-300 icon">+</span>
+                    </button>
+                    <div class="content max-h-0 overflow-hidden transition-all duration-500 ease-in-out bg-black/20">
+                        <div class="px-8 pb-6 pt-2 text-gray-400 text-lg border-l-2 border-brand-500 ml-12">
+                            Архитектура сайта, путь клиента и точки конверсии. Каждый блок имеет цель в деньгах.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="glass rounded-xl overflow-hidden group accordion-item border border-white/5 transition-all duration-300 hover:border-brand-500/30">
+                    <button class="w-full px-8 py-6 text-left flex justify-between items-center focus:outline-none" onclick="toggleAccordion(this)">
+                        <div class="flex items-center gap-6">
+                            <span class="text-2xl font-bold text-brand-500/50 group-hover:text-brand-400 transition">04</span>
+                            <span class="text-xl font-semibold">Внедряем и увеличиваем заявки</span>
+                        </div>
+                        <span class="text-2xl transform transition-transform duration-300 icon">+</span>
+                    </button>
+                    <div class="content max-h-0 overflow-hidden transition-all duration-500 ease-in-out bg-black/20">
+                        <div class="px-8 pb-6 pt-2 text-gray-400 text-lg border-l-2 border-brand-500 ml-12">
+                            Запускаем, замеряем метрики, итерациями докручиваем поток заявок до целевого.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 7. ФОРМА ==================== -->
+    <section id="form-section" class="py-32 relative z-10">
+        <div class="absolute inset-0 bg-brand-900/10 blur-[120px] rounded-full z-[-1] max-w-3xl mx-auto"></div>
+        <div class="container mx-auto px-6 max-w-lg reveal">
+            
+            <div class="glass-panel p-10 md:p-14 rounded-3xl text-center">
+                <h2 class="text-3xl font-bold mb-4">Узнайте, где ваш бизнес теряет клиентов</h2>
+                <p class="text-gray-400 mb-10">Получите разбор, где сайт и воронка сливают заявки — и что с этим делать.</p>
+                
+                <form onsubmit="event.preventDefault(); alert('Заявка отправлена. Мы свяжемся с вами.');" class="space-y-6 text-left">
+                    
+                    <div class="space-y-1 group">
+                        <label class="text-sm text-gray-400 pl-2 group-focus-within:text-brand-400 transition">Имя</label>
+                        <input type="text" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-brand-500/50 focus:bg-white/10 transition">
+                    </div>
+
+                    <div class="space-y-1 group">
+                        <label class="text-sm text-gray-400 pl-2 group-focus-within:text-brand-400 transition">Контакт (Telegram / Phone)</label>
+                        <input type="text" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-brand-500/50 focus:bg-white/10 transition">
+                    </div>
+
+                    <div class="space-y-1 group">
+                        <label class="text-sm text-gray-400 pl-2 group-focus-within:text-brand-400 transition">Кратко о бизнесе и текущей проблеме</label>
+                        <textarea rows="3" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-brand-500/50 focus:bg-white/10 transition resize-none"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full py-5 mt-4 bg-brand-600 hover:bg-brand-500 text-white rounded-xl font-bold text-lg transition-all duration-300 shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_40px_rgba(79,70,229,0.6)]">
+                        Получить разбор бизнеса
+                    </button>
+                </form>
+            </div>
+
+            <div class="mt-14 text-center space-y-8 reveal">
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4">Связь с нами</h3>
+                    <div class="flex flex-wrap items-center justify-center gap-3">
+                        <button type="button" class="px-4 py-2 rounded-xl glass border border-white/10 text-brand-300 hover:border-brand-500/50 transition">G-Mail</button>
+                        <button type="button" class="px-4 py-2 rounded-xl glass border border-white/10 text-brand-300 hover:border-brand-500/50 transition">E-Mail</button>
+                        <button type="button" class="px-4 py-2 rounded-xl glass border border-white/10 text-brand-300 hover:border-brand-500/50 transition">Telegram</button>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4">Наши Соц Сети</h3>
+                    <div class="flex flex-wrap items-center justify-center gap-3">
+                        <button type="button" class="px-4 py-2 rounded-xl glass border border-white/10 text-brand-300 hover:border-brand-500/50 transition">YouTube</button>
+                        <button type="button" class="px-4 py-2 rounded-xl glass border border-white/10 text-brand-300 hover:border-brand-500/50 transition">Inst</button>
+                        <button type="button" class="px-4 py-2 rounded-xl glass border border-white/10 text-brand-300 hover:border-brand-500/50 transition">Inst (Blog)</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-8 border-t border-white/5 text-center text-gray-500 text-sm relative z-10">
+        <p>© 2026 USEMOGUCHIY UPGRADE. Системный подход к продажам.</p>
+    </footer>
+
+    <!-- Поп-ап для нод схемы -->
+    <svg id="node-popup-tail" class="pointer-events-none" aria-hidden="true"></svg>
+    <div id="node-popup" class="hidden">
+        <button id="node-popup-close" aria-label="Закрыть">×</button>
+        <h4 id="node-popup-title"></h4>
+        <p id="node-popup-text"></p>
+    </div>
+
+    <!-- Скрипты -->
+    <script>
+        // Масштаб мини-сайтов в рамке без внутреннего скролла
+        let mockupScaleTimer;
+        function updateMockupScales() {
+            document.querySelectorAll('.mockup-frame').forEach(frame => {
+                const vp = frame.querySelector('.mockup-viewport');
+                const wrap = frame.querySelector('.mockup-scale-wrap');
+                if (!vp || !wrap) return;
+                wrap.style.transform = 'scale(1)';
+                wrap.style.width = '100%';
+                const vw = vp.clientWidth;
+                const vh = vp.clientHeight;
+                const nw = wrap.scrollWidth;
+                const nh = wrap.scrollHeight;
+                if (!vh || !nh) return;
+                const s = Math.min(1, vw / Math.max(nw, 1), vh / nh);
+                wrap.style.transform = 'scale(' + s + ')';
+                wrap.style.transformOrigin = 'top center';
+            });
+        }
+        function scheduleMockupScales() {
+            clearTimeout(mockupScaleTimer);
+            mockupScaleTimer = setTimeout(updateMockupScales, 60);
+        }
+        window.addEventListener('resize', scheduleMockupScales);
+        window.addEventListener('load', () => {
+            updateMockupScales();
+            requestAnimationFrame(updateMockupScales);
+        });
+
+        (function buildGlobalMarquee() {
+            const inner = document.getElementById('global-marquee-inner');
+            if (!inner) return;
+            const eight = (word) => new Array(8).fill('<span>' + word + '</span>').join('');
+            const track = (word) => eight(word) + eight(word);
+            let html = '';
+            for (let i = 0; i < 7; i++) {
+                const rtl = i % 2 === 1;
+                const w = rtl ? 'UPGRADE' : 'USEMOGUCHIY';
+                const cls = rtl ? 'marquee-track-rtl' : 'marquee-track-ltr';
+                html += '<div class="marquee-row"><div class="marquee-track ' + cls + '">' + track(w) + '</div></div>';
+            }
+            inner.innerHTML = html;
+        })();
+
+        function updateMarqueeMobileMask() {
+            const layer = document.getElementById('global-marquee-layer');
+            const cutoff = document.getElementById('marquee-mobile-cutoff');
+            if (!layer) return;
+            if (window.innerWidth >= 768) {
+                layer.style.webkitMaskImage = '';
+                layer.style.maskImage = '';
+                return;
+            }
+            if (!cutoff) return;
+            const r = cutoff.getBoundingClientRect();
+            const fadePx = 200;
+            const tFadeEnd = Math.max(0, r.top);
+            const tFadeStart = Math.max(0, r.top - fadePx);
+            let m;
+            if (tFadeEnd <= 1) {
+                m = 'linear-gradient(to bottom, transparent 0px, transparent 100%)';
+            } else {
+                m = 'linear-gradient(to bottom, #000 0px, #000 ' + tFadeStart + 'px, transparent ' + tFadeEnd + 'px)';
+            }
+            layer.style.webkitMaskImage = m;
+            layer.style.maskImage = m;
+        }
+        window.addEventListener('scroll', updateMarqueeMobileMask, { passive: true });
+        window.addEventListener('resize', updateMarqueeMobileMask);
+
+        (function initAvatarSocial() {
+            const hub = document.getElementById('avatar-hub');
+            const trigger = document.getElementById('avatar-trigger');
+            const insta = document.getElementById('avatar-btn-insta');
+            const yt = document.getElementById('avatar-btn-yt');
+            if (!hub || !trigger) return;
+            function setOpen(open) {
+                hub.classList.toggle('avatar-hub--open', open);
+                trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+                if (insta) insta.setAttribute('aria-hidden', open ? 'false' : 'true');
+                if (yt) yt.setAttribute('aria-hidden', open ? 'false' : 'true');
+            }
+            function toggle() {
+                setOpen(!hub.classList.contains('avatar-hub--open'));
+            }
+            trigger.addEventListener('click', () => toggle());
+            trigger.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggle();
+                }
+            });
+            document.addEventListener('click', (e) => {
+                if (!hub.classList.contains('avatar-hub--open')) return;
+                if (e.target.closest('#avatar-hub')) return;
+                setOpen(false);
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && hub.classList.contains('avatar-hub--open')) setOpen(false);
+            });
+        })();
+
+        (function initComparisonFloat() {
+            const overlay = document.getElementById('comparison-float-overlay');
+            const overlayImg = document.getElementById('comparison-float-overlay-img');
+            const fineHover = window.matchMedia('(hover: hover) and (pointer: fine)');
+            const triggers = document.querySelectorAll('[data-comparison-float-src]');
+            if (!overlay || !overlayImg || !triggers.length) return;
+
+            const shade = overlay.querySelector('.comparison-float-overlay__shade');
+            const stage = overlay.querySelector('.comparison-float-overlay__stage');
+
+            function syncAria() {
+                const cur = overlay.dataset.activeSrc || '';
+                triggers.forEach((t) => {
+                    const s = t.getAttribute('data-comparison-float-src');
+                    t.setAttribute('aria-expanded', cur && cur === s ? 'true' : 'false');
+                });
+            }
+
+            function openFromTrigger(trigger) {
+                const src = trigger.getAttribute('data-comparison-float-src');
+                const alt = trigger.getAttribute('data-comparison-float-alt') || '';
+                if (!src) return;
+                overlayImg.src = src;
+                overlayImg.alt = alt;
+                overlay.dataset.activeSrc = src;
+                overlay.classList.add('is-open');
+                overlay.setAttribute('aria-hidden', 'false');
+                syncAria();
+                document.documentElement.style.overflow = 'hidden';
+            }
+
+            function closeComparisonFloat() {
+                overlay.classList.remove('is-open');
+                overlay.setAttribute('aria-hidden', 'true');
+                delete overlay.dataset.activeSrc;
+                syncAria();
+                document.documentElement.style.overflow = '';
+            }
+
+            function isOpen() {
+                return overlay.classList.contains('is-open');
+            }
+
+            function activeSrc() {
+                return overlay.dataset.activeSrc || '';
+            }
+
+            triggers.forEach((trigger) => {
+                const src = trigger.getAttribute('data-comparison-float-src');
+                trigger.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (isOpen() && activeSrc() === src) closeComparisonFloat();
+                    else openFromTrigger(trigger);
+                });
+            });
+
+            if (shade) shade.addEventListener('click', closeComparisonFloat);
+            if (stage) stage.addEventListener('click', closeComparisonFloat);
+
+            overlay.addEventListener('mouseleave', () => {
+                if (fineHover.matches && isOpen()) closeComparisonFloat();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && isOpen()) closeComparisonFloat();
+            });
+        })();
+
+        // 1. Scroll Indicator & Reveal Animation
+        const scrollProgress = document.getElementById('scroll-progress');
+        const reveals = document.querySelectorAll('.reveal');
+
+        window.addEventListener('scroll', () => {
+            // Scroll Progress
+            const totalScroll = document.documentElement.scrollTop;
+            const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scroll = `${totalScroll / windowHeight * 100}%`;
+            scrollProgress.style.width = scroll;
+
+            // Reveal
+            reveals.forEach(element => {
+                const windowHeight = window.innerHeight;
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 100;
+                if (elementTop < windowHeight - elementVisible) {
+                    element.classList.add('active');
+                }
+            });
+        });
+        
+        // Initial check for reveal
+        window.dispatchEvent(new Event('scroll'));
+        updateMockupScales();
+        requestAnimationFrame(updateMockupScales);
+        setTimeout(updateMockupScales, 300);
+        setTimeout(updateMockupScales, 800);
+        updateMarqueeMobileMask();
+        requestAnimationFrame(updateMarqueeMobileMask);
+
+        // 2. Accordion Logic
+        function toggleAccordion(btn) {
+            const content = btn.nextElementSibling;
+            const icon = btn.querySelector('.icon');
+            
+            // Close all others
+            document.querySelectorAll('.accordion-item .content').forEach(el => {
+                if(el !== content) {
+                    el.style.maxHeight = null;
+                    el.previousElementSibling.querySelector('.icon').style.transform = 'rotate(0deg)';
+                }
+            });
+
+            if (content.style.maxHeight) {
+                content.style.maxHeight = null;
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                content.style.maxHeight = content.scrollHeight + "px";
+                icon.style.transform = 'rotate(45deg)';
+            }
+        }
+
+        // 3. Interactive "Candy" & Node Graph
+        const unlockBtn = document.getElementById('unlock-btn');
+        const unlockOverlay = document.getElementById('unlock-overlay');
+        const graphContainer = document.getElementById('graph-container');
+        const canvasParticles = document.getElementById('particle-canvas');
+        const ctxP = canvasParticles.getContext('2d');
+        
+        let graphUnlocked = false;
+
+        // Resize Canvas function
+        function resizeCanvas(canvas) {
+            const parent = canvas.parentElement;
+            canvas.width = parent.offsetWidth;
+            canvas.height = parent.offsetHeight;
+        }
+
+        window.addEventListener('resize', () => {
+            resizeCanvas(canvasParticles);
+            if (graphUnlocked) {
+                drawGraphLines();
+            }
+        });
+        resizeCanvas(canvasParticles);
+
+        // Particle System
+        let particles = [];
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 8 + 2;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                this.size = Math.random() * 4 + 1;
+                this.life = 1;
+                this.decay = Math.random() * 0.02 + 0.01;
+                this.color = Math.random() > 0.5 ? '#6366f1' : '#a5b4fc';
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+            }
+            draw() {
+                ctxP.beginPath();
+                ctxP.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctxP.fillStyle = `rgba(${this.color === '#6366f1' ? '99,102,241' : '165,180,252'}, ${this.life})`;
+                ctxP.fill();
+            }
+        }
+
+        function animateParticles() {
+            ctxP.clearRect(0, 0, canvasParticles.width, canvasParticles.height);
+            particles = particles.filter(p => p.life > 0);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            if (particles.length > 0) {
+                requestAnimationFrame(animateParticles);
+            } else if (graphUnlocked) {
+                canvasParticles.style.display = 'none'; // hide when done
+            }
+        }
+
+        unlockBtn.addEventListener('click', (e) => {
+            const rect = unlockBtn.getBoundingClientRect();
+            const canvasRect = canvasParticles.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2 - canvasRect.left;
+            const centerY = rect.top + rect.height / 2 - canvasRect.top;
+
+            // Create particles
+            for(let i = 0; i < 150; i++) {
+                particles.push(new Particle(centerX, centerY));
+            }
+            animateParticles();
+
+            // UI Changes
+            unlockOverlay.style.opacity = '0';
+            setTimeout(() => {
+                unlockOverlay.style.display = 'none';
+                graphContainer.style.opacity = '1';
+                graphUnlocked = true;
+                drawGraphLines();
+            }, 500);
+        });
+
+        // Node Graph Logic
+        const canvasLines = document.getElementById('graph-lines');
+        const ctxL = canvasLines.getContext('2d');
+        const nodes = document.querySelectorAll('.node-item');
+        const popup = document.getElementById('node-popup');
+        const popupTitle = document.getElementById('node-popup-title');
+        const popupText = document.getElementById('node-popup-text');
+        const popupClose = document.getElementById('node-popup-close');
+        const tailSvg = document.getElementById('node-popup-tail');
+
+        // Define logical connections
+        const connections = [
+            {from: '1', to: '3'}, {from: '2', to: '3'},
+            {from: '3', to: '5'}, {from: '3', to: '6'},
+            {from: '4', to: '5'}, {from: '4', to: '7'},
+            {from: '5', to: '8'}, {from: '6', to: '8'}, {from: '7', to: '8'},
+            {from: '8', to: '9'}
+        ];
+
+        const infoTexts = {
+            '1': 'Разбираем модель бизнеса: что продаёт, кому, за сколько и почему сейчас не покупают.',
+            '2': 'Находим, где именно сайт и воронка теряют деньги — точки слива трафика и заявок.',
+            '3': 'Определяем реальную целевую аудиторию: её боли, возражения и язык покупки.',
+            '4': 'Собираем оффер по формуле: результат + срок + гарантия + объяснение.',
+            '5': 'Строим карту экранов так, чтобы каждый шаг приближал клиента к заявке.',
+            '6': 'Пишем тексты, которые продают смыслы, а не описывают процесс.',
+            '7': 'Делаем интерфейс, в котором клиент не думает «как», а просто доходит до покупки.',
+            '8': 'Замеряем метрики и докручиваем элементы до максимальной конверсии в лида.',
+            '9': 'Стабильный поток клиентов и предсказуемая выручка вместо случайных продаж.'
+        };
+
+        const nodeTitles = {
+            '1': 'Анализ бизнеса',
+            '2': 'Поиск узких мест',
+            '3': 'Понимание ЦА',
+            '4': 'Формирование оффера',
+            '5': 'Архитектура сайта',
+            '6': 'Контент',
+            '7': 'UX',
+            '8': 'Конверсия',
+            '9': 'Рост клиентов'
+        };
+
+        let hoveredNodeId = null;
+        let selectedNodeId = null;
+
+        function drawGraphLines() {
+            if(!graphUnlocked) return;
+            resizeCanvas(canvasLines);
+            ctxL.clearRect(0, 0, canvasLines.width, canvasLines.height);
+            
+            const containerRect = canvasLines.getBoundingClientRect();
+
+            // Get center coordinates of all nodes relative to canvas
+            const nodeCoords = {};
+            nodes.forEach(node => {
+                const rect = node.getBoundingClientRect();
+                nodeCoords[node.dataset.id] = {
+                    x: rect.left + rect.width / 2 - containerRect.left,
+                    y: rect.top + rect.height / 2 - containerRect.top
+                };
+            });
+
+            // Draw lines
+            connections.forEach(conn => {
+                const start = nodeCoords[conn.from];
+                const end = nodeCoords[conn.to];
+                if(start && end) {
+                    const isHoveredLine = hoveredNodeId === conn.from || hoveredNodeId === conn.to;
+                    
+                    ctxL.beginPath();
+                    ctxL.moveTo(start.x, start.y);
+                    
+                    // Simple curve
+                    const cpX = (start.x + end.x) / 2;
+                    ctxL.bezierCurveTo(cpX, start.y, cpX, end.y, end.x, end.y);
+                    
+                    if (isHoveredLine) {
+                        ctxL.strokeStyle = 'rgba(99, 102, 241, 0.8)'; // Bright brand color
+                        ctxL.lineWidth = 3;
+                        ctxL.shadowBlur = 10;
+                        ctxL.shadowColor = 'rgba(99, 102, 241, 0.5)';
+                    } else {
+                        ctxL.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+                        ctxL.lineWidth = 1.5;
+                        ctxL.shadowBlur = 0;
+                    }
+                    ctxL.stroke();
+                }
+            });
+            ctxL.shadowBlur = 0; // reset
+        }
+
+        function rectsOverlap(a, b) {
+            return !(a.x + a.w < b.x || b.x + b.w < a.x || a.y + a.h < b.y || b.y + b.h < a.y);
+        }
+
+        function placePopupNear(nodeRect) {
+            const w = popup.offsetWidth;
+            const h = popup.offsetHeight;
+            const margin = 16;
+            const maxX = Math.max(margin, window.innerWidth - w - margin);
+            const maxY = Math.max(margin, window.innerHeight - h - margin);
+            const buffer = 12;
+            const expanded = {
+                x: nodeRect.x - buffer,
+                y: nodeRect.y - buffer,
+                w: nodeRect.w + buffer * 2,
+                h: nodeRect.h + buffer * 2
+            };
+            let x = margin, y = margin;
+            for (let i = 0; i < 12; i++) {
+                x = margin + Math.random() * (maxX - margin);
+                y = margin + Math.random() * (maxY - margin);
+                if (!rectsOverlap({ x, y, w, h }, expanded)) break;
+            }
+            popup.style.left = x + 'px';
+            popup.style.top = y + 'px';
+            return { x, y, w, h };
+        }
+
+        function drawTail(fromX, fromY, popupBox) {
+            tailSvg.innerHTML = '';
+            tailSvg.setAttribute('width', window.innerWidth);
+            tailSvg.setAttribute('height', window.innerHeight);
+            tailSvg.setAttribute('viewBox', `0 0 ${window.innerWidth} ${window.innerHeight}`);
+
+            // Привязываемся к ближайшему краю поп-апа
+            const cx = popupBox.x + popupBox.w / 2;
+            const cy = popupBox.y + popupBox.h / 2;
+            const dx = cx - fromX;
+            const dy = cy - fromY;
+            let toX, toY;
+            if (Math.abs(dx) * popupBox.h > Math.abs(dy) * popupBox.w) {
+                toX = dx > 0 ? popupBox.x : popupBox.x + popupBox.w;
+                toY = cy;
+            } else {
+                toX = cx;
+                toY = dy > 0 ? popupBox.y : popupBox.y + popupBox.h;
+            }
+
+            const ns = 'http://www.w3.org/2000/svg';
+            const midX = (fromX + toX) / 2;
+            const midY = (fromY + toY) / 2;
+
+            const path = document.createElementNS(ns, 'path');
+            path.setAttribute('d', `M ${fromX} ${fromY} Q ${midX} ${fromY} ${midX} ${midY} T ${toX} ${toY}`);
+            path.setAttribute('stroke', 'rgba(99, 102, 241, 0.85)');
+            path.setAttribute('stroke-width', '2');
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke-dasharray', '6 4');
+            path.setAttribute('stroke-linecap', 'round');
+            tailSvg.appendChild(path);
+
+            const dotFrom = document.createElementNS(ns, 'circle');
+            dotFrom.setAttribute('cx', fromX);
+            dotFrom.setAttribute('cy', fromY);
+            dotFrom.setAttribute('r', 4);
+            dotFrom.setAttribute('fill', 'rgba(99, 102, 241, 0.95)');
+            tailSvg.appendChild(dotFrom);
+
+            const dotTo = document.createElementNS(ns, 'circle');
+            dotTo.setAttribute('cx', toX);
+            dotTo.setAttribute('cy', toY);
+            dotTo.setAttribute('r', 4);
+            dotTo.setAttribute('fill', 'rgba(165, 180, 252, 0.95)');
+            tailSvg.appendChild(dotTo);
+        }
+
+        function selectNode(node) {
+            nodes.forEach(n => n.classList.remove('selected-node', 'active-node'));
+            node.classList.add('selected-node');
+            selectedNodeId = node.dataset.id;
+            hoveredNodeId = selectedNodeId;
+
+            popupTitle.textContent = nodeTitles[selectedNodeId] || '';
+            popupText.textContent = infoTexts[selectedNodeId] || '';
+            popup.classList.remove('hidden');
+
+            // Сначала измеряем поп-ап (он уже видим), потом размещаем
+            requestAnimationFrame(() => {
+                const nr = node.getBoundingClientRect();
+                const nodeRect = { x: nr.left, y: nr.top, w: nr.width, h: nr.height };
+                const popupBox = placePopupNear(nodeRect);
+                drawTail(nr.left + nr.width / 2, nr.top + nr.height / 2, popupBox);
+                drawGraphLines();
+            });
+        }
+
+        function deselectNode() {
+            nodes.forEach(n => n.classList.remove('selected-node', 'active-node'));
+            selectedNodeId = null;
+            hoveredNodeId = null;
+            popup.classList.add('hidden');
+            tailSvg.innerHTML = '';
+            drawGraphLines();
+        }
+
+        nodes.forEach(node => {
+            node.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (node.dataset.id === selectedNodeId) {
+                    deselectNode();
+                } else {
+                    selectNode(node);
+                }
+            });
+            node.addEventListener('mouseenter', () => {
+                if (selectedNodeId) return;
+                hoveredNodeId = node.dataset.id;
+                node.classList.add('active-node');
+                drawGraphLines();
+            });
+            node.addEventListener('mouseleave', () => {
+                if (selectedNodeId) return;
+                hoveredNodeId = null;
+                node.classList.remove('active-node');
+                drawGraphLines();
+            });
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!selectedNodeId) return;
+            if (e.target.closest('.node-item') || e.target.closest('#node-popup')) return;
+            deselectNode();
+        });
+
+        popupClose.addEventListener('click', (e) => {
+            e.stopPropagation();
+            deselectNode();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && selectedNodeId) deselectNode();
+        });
+
+        window.addEventListener('resize', () => {
+            if (selectedNodeId) {
+                const node = document.querySelector(`.node-item[data-id="${selectedNodeId}"]`);
+                if (node) selectNode(node);
+            }
+        });
+
+        window.addEventListener('scroll', () => {
+            if (selectedNodeId) deselectNode();
+        }, { passive: true });
+
+    </script>
+</body>
+</html>
